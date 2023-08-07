@@ -30,9 +30,11 @@
   },
   "devDependencies": {
     "husky": "^8.0.3",
+    "leva": "^0.9.35",
     "lint-staged": "^13.2.3",
     "prettier": "^3.0.1",
-    "prettier-plugin-tailwindcss": "^0.4.1"
+    "prettier-plugin-tailwindcss": "^0.4.1",
+    "r3f-perf": "^7.1.2"
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix",
