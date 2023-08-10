@@ -3,22 +3,49 @@
 import {
   AccumulativeShadows,
   Caustics,
+  Center,
   CubeCamera,
   Environment,
   MeshRefractionMaterial,
   OrbitControls,
   RandomizedLight,
+  Sky,
+  Sparkles,
+  Stars,
+  Text3D,
 } from "@react-three/drei"
 import { Canvas, useLoader } from "@react-three/fiber"
 import { Perf } from "r3f-perf"
 import { useControls } from "leva"
-import { Texture } from "three"
+import { Color, Mesh, Texture } from "three"
 import { RGBELoader } from "three-stdlib"
 
-function Diamond() {
-  const diamondConfig = useControls("Diamond", {
+function BigText({ text }: { text: string }) {
+  const textConfig = useControls("Text", {
+    position: [0, 0, 0],
+    rotation: [0, 0, 0],
+  })
+  return (
+    <Center position={textConfig.position} rotation={textConfig.rotation}>
+      <Text3D
+        bevelEnabled
+        bevelSegments={5}
+        bevelThickness={0.2}
+        castShadow
+        font="super-funtime.json"
+      >
+        {text}
+        <meshStandardMaterial metalness={0.9} roughness={0.1} />
+        {/* <Sparkles count={10} scale={5 * 2} size={6} speed={0.4} /> */}
+      </Text3D>
+    </Center>
+  )
+}
+
+function Refractor() {
+  const refractorConfig = useControls("Refractor", {
     position: [0, 2, 0],
-    causticPosition: [0, -1, 0],
+    causticPosition: [0, -0.5, 0],
   })
   const envTexture = useLoader(
     RGBELoader,
@@ -26,21 +53,22 @@ function Diamond() {
   )
 
   return (
-    <CubeCamera envMap={envTexture}>
+    <CubeCamera envMap={envTexture} position={refractorConfig.position}>
       {(texture: Texture) => {
         return (
-          <Caustics
-            causticsOnly={false}
-            backside
-            debug
-            position={diamondConfig.causticPosition}
-            lightSource={[5, 5, -10]}
-          >
-            <mesh castShadow position={diamondConfig.position}>
-              <torusKnotGeometry />
-              <MeshRefractionMaterial envMap={texture} />
-            </mesh>
-          </Caustics>
+          <Center position={refractorConfig.causticPosition}>
+            <Caustics
+              causticsOnly={false}
+              backside
+              debug
+              lightSource={[5, 5, -10]}
+            >
+              <mesh>
+                <boxGeometry />
+                <MeshRefractionMaterial envMap={texture} />
+              </mesh>
+            </Caustics>
+          </Center>
         )
       }}
     </CubeCamera>
@@ -64,18 +92,20 @@ export default function NatureScene() {
     <Canvas shadows camera={{ position: [-5, 0.5, 5], fov: 45 }}>
       <Perf />
 
-      <color attach="background" args={[mainConfig.backgroundColor]} />
+      {/* With the sky element the background color is not used. */}
+      {/* <color attach="background" args={[mainConfig.backgroundColor]} /> */}
       <ambientLight intensity={mainConfig.ambientLightIntensity} />
 
-      <Diamond />
-      <mesh castShadow position={[-2, 0.5, -2]}>
+      <BigText text="Digital Garden" />
+      {/* <Refractor /> */}
+      {/* <mesh castShadow position={[-2, 0.5, -2]}>
         <sphereGeometry />
         <meshStandardMaterial color={"red"} />
-      </mesh>
-      <mesh castShadow position={[2, 0.5, 2]}>
+      </mesh> */}
+      {/* <mesh castShadow position={[2, 0.5, 2]}>
         <sphereGeometry />
         <meshStandardMaterial color={"blue"} />
-      </mesh>
+      </mesh> */}
       <AccumulativeShadows
         temporal
         frames={100}
@@ -96,7 +126,19 @@ export default function NatureScene() {
         />
       </AccumulativeShadows>
       <OrbitControls />
-      <Environment preset="city" />
+      <Environment preset="forest" />
+      <Sky sunPosition={[100, 20, 100]} />
+      <axesHelper
+        scale={2}
+        position={[0, 0, 0]}
+        onUpdate={(self) =>
+          self.setColors(
+            new Color(0xff2080),
+            new Color(0x20ff80),
+            new Color(0x2080ff)
+          )
+        }
+      />
     </Canvas>
   )
 }
